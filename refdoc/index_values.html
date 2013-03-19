@@ -4,12 +4,15 @@
 <meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
 <link rel="Start" href="index.html">
 <link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
 <link title="Index of values" rel=Appendix href="index_values.html">
 <link title="Index of modules" rel=Appendix href="index_modules.html">
 <link title="Rss" rel="Chapter" href="Rss.html"><title>Index of values</title>
 </head>
 <body>
-<center><h1>Index of values</h1></center>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;</div>
+<h1>Index of values</h1>
 <table>
 <tr><td align="left"><br>C</td></tr>
 <tr><td><a href="Rss.html#VALchannel">channel</a> [<a href="Rss.html">Rss</a>]</td>
@@ -20,28 +23,45 @@
 <td></td></tr>
 <tr><td><a href="Rss.html#VALchannel_of_string">channel_of_string</a> [<a href="Rss.html">Rss</a>]</td>
 <td></td></tr>
+<tr><td><a href="Rss.html#VALchannel_t_of_channel">channel_t_of_channel</a> [<a href="Rss.html">Rss</a>]</td>
+<td></td></tr>
+<tr><td><a href="Rss.html#VALchannel_t_of_file">channel_t_of_file</a> [<a href="Rss.html">Rss</a>]</td>
+<td><div class="info">
+<code class="code">channel_[t_]of_X</code> returns the parsed channel and a list of encountered errors.
+</div>
+</td></tr>
+<tr><td><a href="Rss.html#VALchannel_t_of_string">channel_t_of_string</a> [<a href="Rss.html">Rss</a>]</td>
+<td></td></tr>
 <tr><td><a href="Rss.html#VALcopy_channel">copy_channel</a> [<a href="Rss.html">Rss</a>]</td>
 <td></td></tr>
 <tr><td><a href="Rss.html#VALcopy_item">copy_item</a> [<a href="Rss.html">Rss</a>]</td>
 <td></td></tr>
-<tr><td align="left"><br>F</td></tr>
-<tr><td><a href="Rss.html#VALfloat_to_date">float_to_date</a> [<a href="Rss.html">Rss</a>]</td>
+<tr><td align="left"><br>D</td></tr>
+<tr><td><a href="Rss.html#VALdefault_opts">default_opts</a> [<a href="Rss.html">Rss</a>]</td>
 <td></td></tr>
 <tr><td align="left"><br>I</td></tr>
 <tr><td><a href="Rss.html#VALitem">item</a> [<a href="Rss.html">Rss</a>]</td>
-<td></td></tr>
+<td><div class="info">
+<code class="code">item()</code> creates a new item with all fields set to <code class="code">None</code>.
+</div>
+</td></tr>
 <tr><td align="left"><br>K</td></tr>
 <tr><td><a href="Rss.html#VALkeep_n_items">keep_n_items</a> [<a href="Rss.html">Rss</a>]</td>
 <td><div class="info">
 <code class="code">keep_n_items n ch</code> returns a copy of the channel, keeping only
-     <code class="code">n</code> items maximum.
+    <code class="code">n</code> items maximum.
 </div>
 </td></tr>
 <tr><td align="left"><br>M</td></tr>
+<tr><td><a href="Rss.html#VALmake_opts">make_opts</a> [<a href="Rss.html">Rss</a>]</td>
+<td><div class="info">
+See Neturl documentation for <code class="code">schemes</code> and <code class="code">base_syntax</code> options.
+</div>
+</td></tr>
 <tr><td><a href="Rss.html#VALmerge_channels">merge_channels</a> [<a href="Rss.html">Rss</a>]</td>
 <td><div class="info">
 <code class="code">merge_channels c1 c2</code> merges the given channels in a new channel,
-     sorting items using <a href="Rss.html#VALsort_items_by_date"><code class="code">Rss.sort_items_by_date</code></a>.
+    sorting items using <a href="Rss.html#VALsort_items_by_date"><code class="code">Rss.sort_items_by_date</code></a>.
 </div>
 </td></tr>
 <tr><td align="left"><br>P</td></tr>
@@ -50,15 +70,17 @@
 <tr><td><a href="Rss.html#VALprint_file">print_file</a> [<a href="Rss.html">Rss</a>]</td>
 <td></td></tr>
 <tr><td align="left"><br>S</td></tr>
-<tr><td><a href="Rss.html#VALsince_epoch">since_epoch</a> [<a href="Rss.html">Rss</a>]</td>
-<td></td></tr>
 <tr><td><a href="Rss.html#VALsort_items_by_date">sort_items_by_date</a> [<a href="Rss.html">Rss</a>]</td>
 <td><div class="info">
 Sort items by date, older last.
 </div>
 </td></tr>
 <tr><td><a href="Rss.html#VALstring_of_date">string_of_date</a> [<a href="Rss.html">Rss</a>]</td>
-<td></td></tr>
-</table><br>
+<td><div class="info">
+Format a date/time record as a string according to the format
+    string <code class="code">fmt</code>.
+</div>
+</td></tr>
+</table>
 </body>
 </html>

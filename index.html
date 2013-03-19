@@ -24,6 +24,24 @@ OCaml-RSS is <a href="https://github.com/zoggy/ocamlrss">hosted on Github</a>.
 </p>
 <h3>Releases</h3>
 <ul>
+<li><a href="ocamlrss-2.1.0.tar.gz">2.1.0</a> [2013-03-19]:
+<ul>
+<li>handle namespaces (the list is stored in the <code>channel_t</code> structure),</li>
+<li>allow the library user to read addition information from
+  &lt;item&gt; and &lt;channel&gt; prefixed subnodes, as the RSS 2.0 specification
+  indicates this is the way to extend RSS information,</li>
+<li>handle "cloud", "skipHours", "skipDays" and "rating" in channels,</li>
+<li>use <code>Neturl.url</code> instead of <code>string</code> to represent URLs,</li>
+<li>use <code>Netdate</code> instead of <code>Rss_date</code>, which was a copy of <code>Netdate</code>,</li>
+<li>OCamlRSS now depends on <a href="http://projects.camlcity.org/projects/ocamlnet.html">OCamlnet</a>,</li>
+<li>default encoding is now UTF-8,</li>
+<li>new parameter "indent" for printing,</li>
+<li>new "opts" parameter when reading,</li>
+<li>reading returns error list besides channel.</li>
+</ul>
+<strong>Beware that this release introduces backward-incompatible changes.</strong>
+</li>
+
 <li><a href="ocamlrss-2.0.tar.gz">2.0</a> [2012-04-06]:
 first release after extraction from Cameleon. Now uses Xmlm instead
 of Xml-light.</li>
@@ -31,14 +49,16 @@ of Xml-light.</li>
 
 <h2>Installation</h2>
 <p>
-OCaml-RSS requires <a href="http://erratique.ch/software/xmlm">Xmlm</a> &gt;= 1.1.0.
+OCaml-RSS requires <a href="http://erratique.ch/software/xmlm">Xmlm</a> &gt;= 1.1.0
+and <a href="http://projects.camlcity.org/projects/ocamlnet.html">OCamlnet</a> &gt;= 3.6.
 </p>
 <p>To compile and install:
 </p>
 <ul>
 <li><span class="shell">tar xvfz ocamlrss-XXX.tar.gz</span></li>
 <li><span class="shell">cd ocamlrss-XXX</span></li>
-<li><span class="shell">make all install</span></li>
+<li><span class="shell">make all</span></li>
+<li><span class="shell">make install</span></li>
 </ul>
 
 <h2>Documentation</h2>
