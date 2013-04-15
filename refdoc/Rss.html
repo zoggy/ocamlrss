@@ -25,7 +25,7 @@ The RSS library to read and write RSS 2.0 files.
 <p>
 
     Reference:
-    <a href="http://www.rss-specification.com/rss-2.0-specification.htm">RSS
+    <a href="http://www.rssboard.org/rss-specification">RSS
     2.0 specification</a>.<br>
 </div>
 <hr width="100%">
@@ -529,20 +529,21 @@ A namespace is a pair (name, url).<br>
 <code class="code">item()</code> creates a new item with all fields set to <code class="code">None</code>.  Use the
     optional parameters to set fields.<br>
 </div>
-<pre><span id="VALchannel"><span class="keyword">val</span> channel</span> : <code class="type">title:string -><br>       link:<a href="Rss.html#TYPEurl">url</a> -><br>       desc:string -><br>       ?language:string -><br>       ?copyright:string -><br>       ?managing_editor:<a href="Rss.html#TYPEemail">email</a> -><br>       ?webmaster:<a href="Rss.html#TYPEemail">email</a> -><br>       ?pubdate:<a href="Rss.html#TYPEdate">date</a> -><br>       ?last_build_date:<a href="Rss.html#TYPEdate">date</a> -><br>       ?cats:<a href="Rss.html#TYPEcategory">category</a> list -><br>       ?generator:string -><br>       ?cloud:<a href="Rss.html#TYPEcloud">cloud</a> -><br>       ?docs:<a href="Rss.html#TYPEurl">url</a> -><br>       ?ttl:int -><br>       ?image:<a href="Rss.html#TYPEimage">image</a> -><br>       ?rating:<a href="Rss.html#TYPEpics_rating">pics_rating</a> -><br>       ?text_input:<a href="Rss.html#TYPEtext_input">text_input</a> -><br>       ?skip_hours:<a href="Rss.html#TYPEskip_hours">skip_hours</a> -><br>       ?skip_days:<a href="Rss.html#TYPEskip_days">skip_days</a> -><br>       ?data:'a -><br>       ?namespaces:<a href="Rss.html#TYPEnamespace">namespace</a> list -><br>       'b <a href="Rss.html#TYPEitem_t">item_t</a> list -> ('a, 'b) <a href="Rss.html#TYPEchannel_t">channel_t</a></code></pre><br>
+<pre><span id="VALchannel"><span class="keyword">val</span> channel</span> : <code class="type">title:string -><br>       link:<a href="Rss.html#TYPEurl">url</a> -><br>       desc:string -><br>       ?language:string -><br>       ?copyright:string -><br>       ?managing_editor:<a href="Rss.html#TYPEemail">email</a> -><br>       ?webmaster:<a href="Rss.html#TYPEemail">email</a> -><br>       ?pubdate:<a href="Rss.html#TYPEdate">date</a> -><br>       ?last_build_date:<a href="Rss.html#TYPEdate">date</a> -><br>       ?cats:<a href="Rss.html#TYPEcategory">category</a> list -><br>       ?generator:string -><br>       ?cloud:<a href="Rss.html#TYPEcloud">cloud</a> -><br>       ?docs:<a href="Rss.html#TYPEurl">url</a> -><br>       ?ttl:int -><br>       ?image:<a href="Rss.html#TYPEimage">image</a> -><br>       ?rating:<a href="Rss.html#TYPEpics_rating">pics_rating</a> -><br>       ?text_input:<a href="Rss.html#TYPEtext_input">text_input</a> -><br>       ?skip_hours:<a href="Rss.html#TYPEskip_hours">skip_hours</a> -><br>       ?skip_days:<a href="Rss.html#TYPEskip_days">skip_days</a> -><br>       ?data:'a -><br>       ?namespaces:<a href="Rss.html#TYPEnamespace">namespace</a> list -><br>       'b <a href="Rss.html#TYPEitem_t">item_t</a> list -> ('a, 'b) <a href="Rss.html#TYPEchannel_t">channel_t</a></code></pre><div class="info">
 <code class="code">channel items</code> creates a new channel containing <code class="code">items</code>.  Other
     fields are set to <code class="code">None</code> unless the corresponding optional
     parameter is used.<br>
-<pre><span id="VALcopy_item"><span class="keyword">val</span> copy_item</span> : <code class="type"><a href="Rss.html#TYPEitem">item</a> -> <a href="Rss.html#TYPEitem">item</a></code></pre><pre><span id="VALcopy_channel"><span class="keyword">val</span> copy_channel</span> : <code class="type"><a href="Rss.html#TYPEchannel">channel</a> -> <a href="Rss.html#TYPEchannel">channel</a></code></pre><br>
+</div>
+<pre><span id="VALcompare_item"><span class="keyword">val</span> compare_item</span> : <code class="type">?comp_data:('a -> 'a -> int) -> 'a <a href="Rss.html#TYPEitem_t">item_t</a> -> 'a <a href="Rss.html#TYPEitem_t">item_t</a> -> int</code></pre><pre><span id="VALcopy_item"><span class="keyword">val</span> copy_item</span> : <code class="type">'a <a href="Rss.html#TYPEitem_t">item_t</a> -> 'a <a href="Rss.html#TYPEitem_t">item_t</a></code></pre><pre><span id="VALcopy_channel"><span class="keyword">val</span> copy_channel</span> : <code class="type">('a, 'b) <a href="Rss.html#TYPEchannel_t">channel_t</a> -> ('a, 'b) <a href="Rss.html#TYPEchannel_t">channel_t</a></code></pre><br>
 <h2 id="2_Manipulatingchannels">Manipulating channels</h2><br>
-<pre><span id="VALkeep_n_items"><span class="keyword">val</span> keep_n_items</span> : <code class="type">int -> <a href="Rss.html#TYPEchannel">channel</a> -> <a href="Rss.html#TYPEchannel">channel</a></code></pre><div class="info">
+<pre><span id="VALkeep_n_items"><span class="keyword">val</span> keep_n_items</span> : <code class="type">int -> ('a, 'b) <a href="Rss.html#TYPEchannel_t">channel_t</a> -> ('a, 'b) <a href="Rss.html#TYPEchannel_t">channel_t</a></code></pre><div class="info">
 <code class="code">keep_n_items n ch</code> returns a copy of the channel, keeping only
     <code class="code">n</code> items maximum.<br>
 </div>
-<pre><span id="VALsort_items_by_date"><span class="keyword">val</span> sort_items_by_date</span> : <code class="type"><a href="Rss.html#TYPEitem">item</a> list -> <a href="Rss.html#TYPEitem">item</a> list</code></pre><div class="info">
+<pre><span id="VALsort_items_by_date"><span class="keyword">val</span> sort_items_by_date</span> : <code class="type">'a <a href="Rss.html#TYPEitem_t">item_t</a> list -> 'a <a href="Rss.html#TYPEitem_t">item_t</a> list</code></pre><div class="info">
 Sort items by date, older last.<br>
 </div>
-<pre><span id="VALmerge_channels"><span class="keyword">val</span> merge_channels</span> : <code class="type"><a href="Rss.html#TYPEchannel">channel</a> -> <a href="Rss.html#TYPEchannel">channel</a> -> <a href="Rss.html#TYPEchannel">channel</a></code></pre><div class="info">
+<pre><span id="VALmerge_channels"><span class="keyword">val</span> merge_channels</span> : <code class="type">('a, 'b) <a href="Rss.html#TYPEchannel_t">channel_t</a> -> ('a, 'b) <a href="Rss.html#TYPEchannel_t">channel_t</a> -> ('a, 'b) <a href="Rss.html#TYPEchannel_t">channel_t</a></code></pre><div class="info">
 <code class="code">merge_channels c1 c2</code> merges the given channels in a new channel,
     sorting items using <a href="Rss.html#VALsort_items_by_date"><code class="code">Rss.sort_items_by_date</code></a>. Channel information are
     copied from the first channel <code class="code">c1</code>.<br>
@@ -570,6 +571,10 @@ This represents XML trees. Such XML trees are given to
   functions provided to read additional data from RSS channels and items.<br>
 </div>
 
+<pre><span id="VALxml_of_source"><span class="keyword">val</span> xml_of_source</span> : <code class="type">Xmlm.source -> <a href="Rss.html#TYPExmltree">xmltree</a></code></pre><div class="info">
+Read an XML tree from a source.<br>
+<b>Raises</b> <code>Failure</code> in case of error.<br>
+</div>
 <pre><span id="EXCEPTIONError"><span class="keyword">exception</span> Error</span> <span class="keyword">of</span> <code class="type">string</code></pre>
 <div class="info">
 Use this exception to indicate an error is functions given to <code class="code">make_opts</code> used
@@ -593,7 +598,11 @@ See Neturl documentation for <code class="code">schemes</code> and <code class="
   Note that only namespaces declared in the root not of the XML tree are added to <code class="code">ch_namespaces</code> field.<br>
 <b>Raises</b> <code>Failure</code> if the channel could not be parsed.<br>
 </div>
-<pre><span id="VALchannel_t_of_string"><span class="keyword">val</span> channel_t_of_string</span> : <code class="type">('a, 'b) <a href="Rss.html#TYPEopts">opts</a> -> string -> ('a, 'b) <a href="Rss.html#TYPEchannel_t">channel_t</a> * string list</code></pre><pre><span id="VALchannel_t_of_channel"><span class="keyword">val</span> channel_t_of_channel</span> : <code class="type">('a, 'b) <a href="Rss.html#TYPEopts">opts</a> -><br>       Pervasives.in_channel -> ('a, 'b) <a href="Rss.html#TYPEchannel_t">channel_t</a> * string list</code></pre><pre><span id="VALchannel_of_file"><span class="keyword">val</span> channel_of_file</span> : <code class="type">string -> <a href="Rss.html#TYPEchannel">channel</a> * string list</code></pre><pre><span id="VALchannel_of_string"><span class="keyword">val</span> channel_of_string</span> : <code class="type">string -> <a href="Rss.html#TYPEchannel">channel</a> * string list</code></pre><pre><span id="VALchannel_of_channel"><span class="keyword">val</span> channel_of_channel</span> : <code class="type">Pervasives.in_channel -> <a href="Rss.html#TYPEchannel">channel</a> * string list</code></pre><br>
+<pre><span id="VALchannel_t_of_string"><span class="keyword">val</span> channel_t_of_string</span> : <code class="type">('a, 'b) <a href="Rss.html#TYPEopts">opts</a> -> string -> ('a, 'b) <a href="Rss.html#TYPEchannel_t">channel_t</a> * string list</code></pre><pre><span id="VALchannel_t_of_channel"><span class="keyword">val</span> channel_t_of_channel</span> : <code class="type">('a, 'b) <a href="Rss.html#TYPEopts">opts</a> -><br>       Pervasives.in_channel -> ('a, 'b) <a href="Rss.html#TYPEchannel_t">channel_t</a> * string list</code></pre><pre><span id="VALchannel_t_of_xmls"><span class="keyword">val</span> channel_t_of_xmls</span> : <code class="type">('a, 'b) <a href="Rss.html#TYPEopts">opts</a> -> <a href="Rss.html#TYPExmltree">xmltree</a> list -> ('a, 'b) <a href="Rss.html#TYPEchannel_t">channel_t</a> * string list</code></pre><div class="info">
+Read a channel from XML trees. These trees correspond to nodes under the <code class="code">"channel"</code> XML node
+ of a reguler RSS document.<br>
+</div>
+<pre><span id="VALchannel_of_file"><span class="keyword">val</span> channel_of_file</span> : <code class="type">string -> <a href="Rss.html#TYPEchannel">channel</a> * string list</code></pre><pre><span id="VALchannel_of_string"><span class="keyword">val</span> channel_of_string</span> : <code class="type">string -> <a href="Rss.html#TYPEchannel">channel</a> * string list</code></pre><pre><span id="VALchannel_of_channel"><span class="keyword">val</span> channel_of_channel</span> : <code class="type">Pervasives.in_channel -> <a href="Rss.html#TYPEchannel">channel</a> * string list</code></pre><br>
 <h2 id="2_Writingchannels">Writing channels</h2><br>
 <pre><span id="TYPEdata_printer"><span class="keyword">type</span> <code class="type">'a</code> data_printer</span> = <code class="type">'a -> <a href="Rss.html#TYPExmltree">xmltree</a> list</code> </pre>
 
