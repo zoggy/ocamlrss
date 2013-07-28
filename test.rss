@@ -17,6 +17,11 @@
   Cameleon2: Lablgtk-extras (hosted on ocaml forge).
   Library Config_file is now out of Cameleon2 and hosted on ocaml
   forge.
+
+&lt;pre&gt;&lt;code&gt;| p1      | p2      |
+|---------+---------|
+| x  &amp;lt;- 1 | y  &amp;lt;- 1 |
+| r1 &amp;lt;- y | r2 &amp;lt;- x |&lt;/code&gt;&lt;/pre&gt;
       </description>
       <pubDate>13 Jan 2011 11:30:00 +0000</pubDate>
     </item>

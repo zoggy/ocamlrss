@@ -55,14 +55,36 @@ let source_string = function
 | `Channel _ | `Fun _ -> ""
 ;;
 
+(* [trim] borrowed from [String] to ensure that this code also
+   compiles with OCaml 3.12. *)
+let is_space = function
+  | ' ' | '\012' | '\n' | '\r' | '\t' -> true
+  | _ -> false
+
+let trim s =
+  let len = String.length s in
+  let i = ref 0 in
+  while !i < len && is_space (String.unsafe_get s !i) do
+    incr i
+  done;
+  let j = ref (len - 1) in
+  while !j >= !i && is_space (String.unsafe_get s !j) do
+    decr j
+  done;
+  if !i = 0 && !j = len - 1 then
+    s
+  else if !j >= !i then
+    String.sub s !i (!j - !i + 1)
+  else
+    ""
 
 let xml_of_source source =
   try
-    let input = Xmlm.make_input ~strip: true ~enc: (Some `UTF_8)
+    let input = Xmlm.make_input ~strip:false ~enc: (Some `UTF_8)
       (*~entity: (fun s -> Some s)*) source
     in
     let el tag childs = E (tag, childs)  in
-    let data d = D d in
+    let data d = D (trim d) in
     let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
     tree
   with
