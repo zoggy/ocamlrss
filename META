@@ -1,4 +1,4 @@
-version = "2.2.1"
+version = "2.2.2"
 description = "Reading/writing RSS files with OCaml"
 requires = "xmlm,netstring"
 archive(byte) = "rss.cma"
