@@ -24,7 +24,7 @@
 ###############################################################################
 
 # do not forget to update META file too
-VERSION=2.2.1
+VERSION=2.2.2
 
 # do not forget to update META file too
 PACKAGES=xmlm,netstring
