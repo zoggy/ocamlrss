@@ -1,6 +1,6 @@
 Release 2.2.2:
 - fix: remove the beginning and ending spaces in contents of xml
-  nodes, but do not collapse spaces inside PCData.
+  nodes, but do not collapse spaces inside PCData. (by C. Troestler)
 
 Release 2.2.1:
 - fix: do not set default namespace in final rss
