@@ -1,0 +1,9 @@
+(library
+ ((name        ocamlrss)
+  (public_name ocamlrss)
+  (modules (rss_types rss rss_io))
+  (libraries (uri ptime xmlm))))
+
+(executables
+ ((names (rsstest))
+  (libraries (ocamlrss))))

@@ -1,11 +1,6 @@
-*.cm*
-*.o
-*.a
-*.annot
-.chamo*
-rsstest
-t.rss
-t2.rss
-html
+_build
+*.install
+**/*.merlin
+*.rss
 
 

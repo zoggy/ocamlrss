@@ -23,28 +23,17 @@
 (*                                                                            *)
 (******************************************************************************)
 
-type date = Netdate.t
-
-let string_of_date ?(fmt="%d %b %Y") date = Netdate.format ~fmt date
-
-type email = string (** can be, for example: foo@bar.com (Mr Foo Bar) *)
-type pics_rating = string
-type skip_hours = int list (** 0 .. 23 *)
-type skip_days = int list (** 0 is Sunday, 1 is Monday, ... *)
-
-type url = Neturl.url
-
 type category = Rss_types.category =
     {
       cat_name : string ;
-      cat_domain : url option ;
+      cat_domain : Uri.t option ;
     }
 
 type image = Rss_types.image =
     {
-      image_url : url ;
+      image_url : Uri.t ;
       image_title : string ;
-      image_link : url ;
+      image_link : Uri.t ;
       image_height : int option ;
       image_width : int option ;
       image_desc : string option ;
@@ -55,12 +44,12 @@ type text_input = Rss_types.text_input =
       ti_title : string ; (** The label of the Submit button in the text input area. *)
       ti_desc : string ; (** Explains the text input area. *)
       ti_name : string ; (** The name of the text object in the text input area. *)
-      ti_link : url ; (** The URL of the CGI script that processes text input requests. *)
+      ti_link : Uri.t ; (** The URL of the CGI script that processes text input requests. *)
     }
 
 type enclosure = Rss_types.enclosure =
     {
-      encl_url : url ; (** URL of the enclosure *)
+      encl_url : Uri.t ; (** URL of the enclosure *)
       encl_length : int ; (** size in bytes *)
       encl_type : string ; (** MIME type *)
     }
@@ -75,23 +64,23 @@ type cloud = Rss_types.cloud =
     cloud_protocol : string ;
   }
 
-type guid = Rss_types.guid = Guid_permalink of url | Guid_name of string
+type guid = Rss_types.guid = Guid_permalink of Uri.t | Guid_name of string
 
 type source = Rss_types.source =
   {
     src_name : string ;
-    src_url : url ;
+    src_url : Uri.t ;
   }
 
 type 'a item_t = 'a Rss_types.item_t =
   {
     item_title : string option ;
-    item_link : url option ;
+    item_link : Uri.t option ;
     item_desc : string option ;
-    item_pubdate : Netdate.t option ;
-    item_author : email option ;
+    item_pubdate : Ptime.t option ;
+    item_author : string option ;
     item_categories : category list ;
-    item_comments : url option ;
+    item_comments : Uri.t option ;
     item_enclosure : enclosure option ;
     item_guid : guid option ;
     item_source : source option ;
@@ -103,24 +92,24 @@ type namespace = (string * string)
 type ('a, 'b) channel_t = ('a, 'b) Rss_types.channel_t =
   {
     ch_title : string ;
-    ch_link : url ;
+    ch_link : Uri.t ;
     ch_desc : string ;
     ch_language : string option ;
     ch_copyright : string option ;
-    ch_managing_editor : email option ;
-    ch_webmaster : email option ;
-    ch_pubdate : Netdate.t option ;
-    ch_last_build_date : Netdate.t option ;
+    ch_managing_editor : string option ;
+    ch_webmaster : string option ;
+    ch_pubdate : Ptime.t option ;
+    ch_last_build_date : Ptime.t option ;
     ch_categories : category list ;
     ch_generator : string option ;
     ch_cloud : cloud option ;
-    ch_docs : url option ;
+    ch_docs : Uri.t option ;
     ch_ttl : int option ;
     ch_image : image option ;
-    ch_rating : pics_rating option ;
+    ch_rating : string option ;
     ch_text_input : text_input option ;
-    ch_skip_hours : skip_hours option ;
-    ch_skip_days : skip_days option ;
+    ch_skip_hours : int list option ;
+    ch_skip_days : int list option ;
     ch_items : 'b item_t list ;
     ch_data : 'a option ;
     ch_namespaces : namespace list ;
@@ -216,10 +205,7 @@ let sort_items_by_date l =
         None, None -> 0
        | Some _, None -> -1
        | None, Some _ -> 1
-       | Some d1, Some d2 ->
-           compare
-             (Netdate.since_epoch d2)
-             (Netdate.since_epoch d1)
+       | Some d1, Some d2 -> Ptime.compare d2 d1
     ) l;;
 
 let merge_channels c1 c2 =
@@ -254,10 +240,10 @@ type 'a data_printer = 'a -> xmltree list
 
 let print_channel = Rss_io.print_channel
 
-let print_file ?channel_data_printer ?item_data_printer ?indent ?date_fmt ?encoding file ch =
+let print_file ?channel_data_printer ?item_data_printer ?indent ?encoding file ch =
   let oc = open_out file in
   let fmt = Format.formatter_of_out_channel oc in
-  print_channel ?channel_data_printer ?item_data_printer ?indent ?date_fmt ?encoding fmt ch;
+  print_channel ?channel_data_printer ?item_data_printer ?indent ?encoding fmt ch;
   Format.pp_print_flush fmt ();
   close_out oc
 
@@ -270,4 +256,3 @@ let keep_n_items n channel =
   let c = copy_channel channel in
   { c with ch_items = iter [] 1 c.ch_items }
 ;;
-  
