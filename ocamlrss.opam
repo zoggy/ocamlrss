@@ -7,12 +7,12 @@ doc: ["http://zoggy.github.io/ocamlrss/refdoc/Rss.html"]
 tags: [
   "rss"
   "xml"
-  "rdf"
 ]
 build: [ "jbuilder" "build" "@install" ]
-remove: [["ocamlfind" "remove" "rss"]]
 depends: [
   "jbuilder {build}"
+  "uri"
   "xmlm"
   "ptime"
 ]
+available: [ ocaml-version >= "4.02.3" ]
