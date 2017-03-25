@@ -1,7 +1,7 @@
 (library
  ((name        ocamlrss)
   (public_name ocamlrss)
-  (modules (rss_types rss rss_io))
+  (modules (rfc822 rss_types rss rss_io))
   (libraries (uri ptime xmlm))))
 
 (executables
