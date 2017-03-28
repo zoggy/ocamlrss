@@ -102,9 +102,7 @@ let xml_of_source source =
 (** {2 Parsing} *)
 
 type ('a, 'b) opts =
-  { schemes : (string, Neturl.url_syntax) Hashtbl.t ;
-    base_syntax : Neturl.url_syntax ;
-    mutable errors : string list ;
+  { mutable errors : string list ;
     read_channel_data : (xmltree list -> 'a option) option ;
     read_item_data : (xmltree list -> 'b option) option ;
   }
@@ -116,25 +114,17 @@ let error msg = raise (Error msg);;
 
 let find_ele name e =
   match e with
-    E ((("",e),_),_) when name = String.lowercase e -> true
-  | E ((("http://purl.org/rss/1.0/",e),_),_) when name = String.lowercase e -> true
+    E ((("",e),_),_) when name = String.lowercase_ascii e -> true
+  | E ((("http://purl.org/rss/1.0/",e),_),_) when name = String.lowercase_ascii e -> true
   | _ -> false
 
 let apply_opt f = function
     None -> None
   | Some v -> Some (f v)
 
-let url_of_string opts s =
-  try
-    Neturl.parse_url ~schemes: opts.schemes ~base_syntax: opts.base_syntax
-      ~accept_8bits: true ~enable_fragment: true
-      s
-  with Neturl.Malformed_URL ->
-      error (Printf.sprintf "Malformed url %S" s)
-
 let get_att ?ctx ?(required=true) atts name =
-  let name = String.lowercase name in
-  try snd (List.find (function (("",s),_) -> String.lowercase s = name | _ -> false) atts)
+  let name = String.lowercase_ascii name in
+  try snd (List.find (function (("",s),_) -> String.lowercase_ascii s = name | _ -> false) atts)
   with Not_found ->
       if required then
         match ctx with
@@ -147,10 +137,10 @@ let get_att ?ctx ?(required=true) atts name =
         ""
 
 let get_opt_att atts name =
-  let name = String.lowercase name in
+  let name = String.lowercase_ascii name in
   try Some
     (snd (List.find
-      (function (("",s), _) -> String.lowercase s = name | _ -> false)
+      (function (("",s), _) -> String.lowercase_ascii s = name | _ -> false)
         atts)
     )
   with Not_found ->
@@ -162,7 +152,7 @@ let get_source opts xmls =
       E ((_,atts),[D s]) ->
         Some {
           src_name = s ;
-          src_url = url_of_string opts (get_att atts "url") ;
+          src_url = Uri.of_string (get_att atts "url") ;
         }
     | _ ->
         None
@@ -176,7 +166,7 @@ let get_enclosure opts xmls =
       E ((_,atts),_) ->
         let ctx = (opts, "enclosure") in
         Some {
-          encl_url = url_of_string opts (get_att ~ctx atts "url") ;
+          encl_url = Uri.of_string (get_att ~ctx atts "url") ;
           encl_length = int_of_string (get_att ~ctx atts "length") ;
           encl_type = get_att ~ctx atts "type" ;
         }
@@ -187,11 +177,11 @@ let get_enclosure opts xmls =
 
 let get_categories opts xmls =
   let f acc = function
-    E ((("",tag),atts),[D s]) when String.lowercase tag = "category"->
+    E ((("",tag),atts),[D s]) when String.lowercase_ascii tag = "category"->
       begin
         try
           { cat_name = s ;
-            cat_domain = apply_opt (url_of_string opts) (get_opt_att atts "domain") ;
+            cat_domain = apply_opt Uri.of_string (get_opt_att atts "domain") ;
           } :: acc
         with
           Error msg ->
@@ -208,7 +198,7 @@ let get_guid opts xmls =
       E ((_,atts), [D s]) ->
         let x =
           match get_att ~required: false atts "ispermalink" with
-            "true" -> Guid_permalink (url_of_string opts s)
+            "true" -> Guid_permalink (Uri.of_string s)
           | _ -> Guid_name s
         in
         Some x
@@ -267,9 +257,9 @@ let get_image opts xmls =
           with _ -> None
         in
         Some {
-          image_url = url_of_string opts (f "url") ;
+          image_url = Uri.of_string (f "url") ;
           image_title = f "title" ;
-          image_link = url_of_string opts (f "link") ;
+          image_link = Uri.of_string (f "link") ;
           image_width = apply_opt int_of_string (f_opt "width") ;
           image_height = apply_opt int_of_string (f_opt "height") ;
           image_desc = f_opt "description" ;
@@ -289,7 +279,7 @@ let get_text_input opts xmls =
           ti_title = f "title" ;
           ti_desc = f "description" ;
           ti_name = f "name" ;
-          ti_link = url_of_string opts (f "link") ;
+          ti_link = Uri.of_string (f "link") ;
         }
     | D _ ->
         assert false
@@ -321,7 +311,7 @@ let item_of_xmls opts xmls =
     match f_opt "pubdate" with
       None -> None
     | Some s ->
-        try Some (Netdate.parse s)
+        try Some (Rfc822.parse_exn s)
         with _ ->
             add_error opts (Printf.sprintf "Invalid date %S" s);
             None
@@ -337,12 +327,12 @@ let item_of_xmls opts xmls =
     let item =
       {
         item_title = f_opt "title" ;
-        item_link = apply_opt (url_of_string opts) (f_opt "link") ;
+        item_link = apply_opt Uri.of_string (f_opt "link") ;
         item_desc = f_opt "description" ;
         item_pubdate = date ;
         item_author = f_opt "author" ;
         item_categories = get_categories opts xmls ;
-        item_comments = apply_opt (url_of_string opts) (f_opt "comments") ;
+        item_comments = apply_opt Uri.of_string (f_opt "comments") ;
         item_enclosure = get_enclosure opts xmls ;
         item_guid = get_guid opts xmls ;
         item_source = get_source opts xmls ;
@@ -361,7 +351,7 @@ let items_of_xmls opts xmls =
      (fun acc e ->
         match e with
           D _ -> acc
-        |	E ((("",s),_),subs) when String.lowercase s = "item" ->
+        |	E ((("",s),_),subs) when String.lowercase_ascii s = "item" ->
             begin
               match item_of_xmls opts subs with
                 None -> acc
@@ -457,7 +447,7 @@ let channel_of_xmls opts xmls =
     match f_opt "pubdate" with
       None -> None
     | Some s ->
-        try Some (Netdate.parse s)
+        try Some (Rfc822.parse_exn s)
         with _ ->
             add_error opts (Printf.sprintf "Invalid date %S" s);
             None
@@ -466,7 +456,7 @@ let channel_of_xmls opts xmls =
     match f_opt "lastbuilddate" with
       None -> None
     | Some s ->
-        try Some (Netdate.parse s)
+        try Some (Rfc822.parse_exn s)
         with _ ->
             add_error opts (Printf.sprintf "Invalid date %S" s);
             None
@@ -481,11 +471,11 @@ let channel_of_xmls opts xmls =
             None
   in
   let link =
-    try url_of_string opts (f "link")
+    try Uri.of_string (f "link")
     with Error msg -> failwith msg
   in
   let docs =
-    try apply_opt (url_of_string opts) (f_opt "docs")
+    try apply_opt Uri.of_string (f_opt "docs")
     with Error msg ->
         add_error opts msg;
         None
@@ -528,7 +518,7 @@ let channel_of_source opts source =
   | D _ -> failwith "Parse error: not an element"
   | E (((_,e), atts), subs) ->
       let (channel, errors) =
-        match String.lowercase e with
+        match String.lowercase_ascii e with
           "rss" ->
             (
              try
@@ -566,12 +556,10 @@ let channel_of_source opts source =
       ({ channel with ch_namespaces = namespaces }, errors)
 
 let make_opts
-  ?(schemes=Neturl.common_url_syntax)
-    ?(base_syntax=Hashtbl.find Neturl.common_url_syntax "http")
     ?read_channel_data
     ?read_item_data
     () =
-    { schemes ; base_syntax ; errors = [] ;
+    { errors = [] ;
       read_item_data ; read_channel_data ;
     }
 
@@ -623,7 +611,7 @@ let xml_of_category c =
   let atts =
     match c.cat_domain with
       None -> []
-    | Some d -> [("","domain"), Neturl.string_of_url d]
+    | Some d -> [("","domain"), Uri.to_string d]
   in
   E ((("","category"), atts), [D c.cat_name])
 
@@ -637,7 +625,7 @@ let xmls_of_opt_f f v_opt =
 let xml_of_enclosure e =
   E ((("","enclosure"),
 	   [
-	     ("","url"), Neturl.string_of_url e.encl_url ;
+	     ("","url"), Uri.to_string e.encl_url ;
 	     ("","length"), string_of_int e.encl_length ;
 	     ("","type"), e.encl_type ;
 	   ]),
@@ -651,7 +639,7 @@ let xmls_of_enclosure_opt =
 let xml_of_guid = function
   Guid_permalink url ->
     E ((("","guid"), [("","isPermaLink"), "true"]),
-     [D (Neturl.string_of_url url)]
+     [D (Uri.to_string url)]
     )
 | Guid_name name ->
     E ((("","guid"), []), [D name])
@@ -659,7 +647,7 @@ let xml_of_guid = function
 let xmls_of_guid_opt = xmls_of_opt_f xml_of_guid
 
 let xml_of_source_field s =
-  E ((("", "source"), [("","url"), (Neturl.string_of_url s.src_url)]),
+  E ((("", "source"), [("","url"), (Uri.to_string s.src_url)]),
 	   [D s.src_name]
 	  )
 
@@ -667,9 +655,9 @@ let xmls_of_source_opt = xmls_of_opt_f xml_of_source_field
 
 let xml_of_image i =
   E ((("", "image"), []),
-	   [ E((("","url"),[]), [D (Neturl.string_of_url i.image_url)]) ;
+	   [ E((("","url"),[]), [D (Uri.to_string i.image_url)]) ;
 	     E((("","title"),[]), [D i.image_title]) ;
-	     E((("","link"),[]), [D (Neturl.string_of_url i.image_link)])
+	     E((("","link"),[]), [D (Uri.to_string i.image_link)])
 	   ] @
     (List.flatten
      [ opt_element
@@ -726,13 +714,13 @@ let xml_of_text_input t =
 	     E((("","title"), []), [D t.ti_title]) ;
 	     E((("","description"),[]), [D t.ti_desc]) ;
 	     E((("","name"), []), [D t.ti_name]) ;
-	     E((("","link"), []), [D (Neturl.string_of_url t.ti_link)]) ;
+	     E((("","link"), []), [D (Uri.to_string t.ti_link)]) ;
 	   ]
 	  )
 
 let xmls_of_text_input_opt = xmls_of_opt_f xml_of_text_input
 
-let xml_of_item ?item_data_printer ~date_fmt i =
+let xml_of_item ?item_data_printer i =
   let data_xml =
     match i.item_data, item_data_printer with
       None, _
@@ -742,18 +730,18 @@ let xml_of_item ?item_data_printer ~date_fmt i =
   E ((("","item"), []),
    (List.flatten
     [ opt_element i.item_title "title" ;
-      opt_element (apply_opt Neturl.string_of_url i.item_link) "link" ;
+      opt_element (apply_opt Uri.to_string i.item_link) "link" ;
       opt_element i.item_desc "description" ;
       opt_element
         (match i.item_pubdate with
            None -> None
          | Some d ->
              err_date d;
-             Some (Netdate.format ~fmt: date_fmt d))
+             Some (Format.asprintf "%a" Ptime.pp d))
         "pubDate" ;
       opt_element i.item_author "author" ;
       xmls_of_categories i.item_categories ;
-      opt_element (apply_opt Neturl.string_of_url i.item_comments) "comments" ;
+      opt_element (apply_opt Uri.to_string i.item_comments) "comments" ;
       xmls_of_enclosure_opt i.item_enclosure ;
       xmls_of_guid_opt i.item_guid ;
       xmls_of_source_opt i.item_source ;
@@ -762,7 +750,7 @@ let xml_of_item ?item_data_printer ~date_fmt i =
    )
 	  )
 
-let xml_of_channel ?channel_data_printer ?item_data_printer ~date_fmt ch =
+let xml_of_channel ?channel_data_printer ?item_data_printer ch =
   let f v s = E ((("",s), []), [D v]) in
   let data_xml =
     match ch.ch_data, channel_data_printer with
@@ -774,7 +762,7 @@ let xml_of_channel ?channel_data_printer ?item_data_printer ~date_fmt ch =
     E ((("","channel"), []),
      (
       [ f ch.ch_title "title" ;
-        f (Neturl.string_of_url ch.ch_link) "link" ;
+        f (Uri.to_string ch.ch_link) "link" ;
         f ch.ch_desc "description" ;
       ] @
         (List.flatten
@@ -787,7 +775,7 @@ let xml_of_channel ?channel_data_printer ?item_data_printer ~date_fmt ch =
                 None -> None
               | Some d ->
                   err_date d ;
-                  Some (Netdate.format ~fmt: date_fmt d)
+                  Some (Format.asprintf "%a" Ptime.pp d)
              )
              "pubDate" ;
            opt_element
@@ -795,12 +783,12 @@ let xml_of_channel ?channel_data_printer ?item_data_printer ~date_fmt ch =
                 None -> None
               | Some d ->
                   err_date d ;
-                  Some (Netdate.format ~fmt: date_fmt d))
+                  Some (Format.asprintf "%a" Ptime.pp d))
              "lastBuildDate" ;
            xmls_of_categories ch.ch_categories ;
            opt_element ch.ch_generator "generator" ;
            xmls_of_cloud_opt ch.ch_cloud ;
-           opt_element (apply_opt Neturl.string_of_url ch.ch_docs) "docs" ;
+           opt_element (apply_opt Uri.to_string ch.ch_docs) "docs" ;
            opt_element
              (apply_opt string_of_int ch.ch_ttl)
              "ttl";
@@ -810,7 +798,7 @@ let xml_of_channel ?channel_data_printer ?item_data_printer ~date_fmt ch =
            xmls_of_skip_hours_opt ch.ch_skip_hours ;
            xmls_of_skip_days_opt ch.ch_skip_days ;
            data_xml ;
-           List.map (xml_of_item ?item_data_printer ~date_fmt) ch.ch_items ;
+           List.map (xml_of_item ?item_data_printer) ch.ch_items ;
          ]
         )
      )
@@ -822,8 +810,8 @@ let xml_of_channel ?channel_data_printer ?item_data_printer ~date_fmt ch =
 module SMap = Map.Make (struct type t = string let compare = Pervasives.compare end);;
 
 let print_channel ?channel_data_printer ?item_data_printer ?indent
-  ?(date_fmt=default_date_format) ?(encoding="UTF-8")fmt ch =
-  let xml = xml_of_channel ?channel_data_printer ?item_data_printer ~date_fmt ch in
+    ?(encoding="UTF-8")fmt ch =
+  let xml = xml_of_channel ?channel_data_printer ?item_data_printer ch in
   let known_ns =
     List.fold_left (fun map (name, url) -> SMap.add url name map)
       SMap.empty ch.ch_namespaces

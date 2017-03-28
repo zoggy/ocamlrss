@@ -31,44 +31,23 @@
 
 (** {2 Types} *)
 
-type date = Netdate.t
-
-val string_of_date : ?fmt: string -> date -> string
-(** Format a date/time record as a string according to the format
-    string [fmt].
-
-    @param fmt The format string.  It consists of zero or more
-    conversion specifications and ordinary characters.  All ordinary
-    characters are kept as such in the final string.  A conversion
-    specification consists of the '%' character and one other
-    character.  See [Netdate.format_to] for more details.
-    Default: ["%d %b %Y"].
- *)
-
-type email = string (** can be, for example: foo\@bar.com (Mr Foo Bar) *)
-type pics_rating = string
-type skip_hours = int list (** 0 .. 23 *)
-type skip_days = int list (** 0 is Sunday, 1 is Monday, ... *)
-
-type url = Neturl.url
-
 type category =
   {
     cat_name : string ;
     (** A forward-slash-separated string that identifies a hierarchic
         location in the indicated taxonomy. *)
-    cat_domain : url option ;
+    cat_domain : Uri.t option ;
     (** Identifies a categorization taxonomy. *)
   }
 
 type image =
   {
-    image_url : url ;
+    image_url : Uri.t ;
     (** The URL of a GIF, JPEG or PNG image that represents the channel. *)
     image_title : string ;
     (** Description of the image, it's used in the ALT attribute of
         the HTML <img> tag when the channel is rendered in HTML.  *)
-    image_link : url ;
+    image_link : Uri.t ;
     (** The URL of the site, when the channel is rendered, the image
         is a link to the site. (Note, in practice the [image_title]
         and [image_link] should have the same value as the {!channel}'s
@@ -90,25 +69,25 @@ type text_input =
       (** Explains the text input area. *)
       ti_name : string ;
       (** The name of the text object in the text input area. *)
-      ti_link : url ;
+      ti_link : Uri.t ;
       (** The URL of the CGI script that processes text input requests. *)
     }
 
 type enclosure =
   {
-    encl_url : url ; (** URL of the enclosure *)
+    encl_url : Uri.t ; (** URL of the enclosure *)
     encl_length : int ; (** size in bytes *)
     encl_type : string ; (** MIME type *)
   }
 
 type guid =
-  | Guid_permalink of url (** A permanent URL pointing to the story. *)
+  | Guid_permalink of Uri.t (** A permanent URL pointing to the story. *)
   | Guid_name of string   (** A string that uniquely identifies the item.  *)
 
 type source =
     {
       src_name : string ;
-      src_url : url ;
+      src_url : Uri.t ;
     }
 
 (** See {{:http://cyber.law.harvard.edu/rss/soapMeetsRss.html#rsscloudInterface} specification} *)
@@ -126,14 +105,14 @@ type cloud = {
 type 'a item_t =
   {
     item_title : string option; (** Optional title *)
-    item_link : url option; (** Optional link *)
+    item_link : Uri.t option; (** Optional link *)
     item_desc : string option; (** Optional description *)
-    item_pubdate : date option ; (** Date of publication *)
-    item_author : email option ;
+    item_pubdate : Ptime.t option ; (** Date of publication *)
+    item_author : string option ;
     (** The email address of the author of the item. *)
     item_categories : category list ;
     (** Categories for the item.  See the field {!category}. *)
-    item_comments : url option ; (** Url of comments about this item *)
+    item_comments : Uri.t option ; (** Url of comments about this item *)
     item_enclosure : enclosure option ;
     item_guid : guid option ;
     (** A globally unique identifier for the item. *)
@@ -150,7 +129,7 @@ type ('a, 'b) channel_t =
     ch_title : string ;
     (** Mandatory.  The name of the channel, for example the title of
         your web site. *)
-    ch_link : url ;
+    ch_link : Uri.t ;
     (** Mandatory.  The URL to the HTML website corresponding to the channel. *)
     ch_desc : string ;
     (** Mandatory.  A sentence describing the channel. *)
@@ -159,13 +138,13 @@ type ('a, 'b) channel_t =
         {{:http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes}
         language codes}. *)
     ch_copyright : string option ; (** Copyright notice. *)
-    ch_managing_editor : email option ;
+    ch_managing_editor : string option ;
     (** Managing editor of the news. *)
-    ch_webmaster : email option ;
+    ch_webmaster : string option ;
     (** The address of the webmasterof the site. *)
-    ch_pubdate : date option ;
+    ch_pubdate : Ptime.t option ;
     (** Publication date of the channel. *)
-    ch_last_build_date : date option ;
+    ch_last_build_date : Ptime.t option ;
     (** When the channel content changed for the last time. *)
     ch_categories : category list ;
     (** Categories for the channel.  See the field {!category}. *)
@@ -173,17 +152,17 @@ type ('a, 'b) channel_t =
     (** The tool used to generate this channel. *)
     ch_cloud : cloud option ;
     (** Allows processes to register with a cloud to be notified of updates to the channel. *)
-    ch_docs : url option ; (** An url to a RSS format reference. *)
+    ch_docs : Uri.t option ; (** An url to a RSS format reference. *)
     ch_ttl : int option ;
     (** Time to live, in minutes.  It indicates how long a channel can
         be cached before refreshing from the source. *)
     ch_image : image option ;
-    ch_rating : pics_rating option;
+    ch_rating : string option;
     (** The PICS rating for the channel. *)
     ch_text_input : text_input option ;
-    ch_skip_hours : skip_hours option ;
+    ch_skip_hours : int list option ;
     (** A hint for aggregators telling them which hours they can skip.*)
-    ch_skip_days : skip_days option ;
+    ch_skip_days : int list option ;
     (** A hint for aggregators telling them which days they can skip. *)
     ch_items : 'b item_t list ;
     ch_data : 'a option ;
@@ -198,12 +177,12 @@ type channel = (unit, unit) channel_t
 
 val item :
   ?title: string ->
-  ?link: url ->
+  ?link: Uri.t ->
   ?desc: string ->
-  ?pubdate: date ->
-  ?author: email ->
+  ?pubdate: Ptime.t ->
+  ?author: string ->
   ?cats: category list ->
-  ?comments: url ->
+  ?comments: Uri.t ->
   ?encl: enclosure ->
   ?guid: guid ->
   ?source: source ->
@@ -215,24 +194,24 @@ val item :
 
 val channel :
   title: string ->
-  link: url ->
+  link: Uri.t ->
   desc: string ->
   ?language: string ->
   ?copyright: string ->
-  ?managing_editor: email ->
-  ?webmaster: email ->
-  ?pubdate: date ->
-  ?last_build_date: date ->
+  ?managing_editor: string ->
+  ?webmaster: string ->
+  ?pubdate: Ptime.t ->
+  ?last_build_date: Ptime.t ->
   ?cats: category list ->
   ?generator: string ->
   ?cloud: cloud ->
-  ?docs: url ->
+  ?docs: Uri.t ->
   ?ttl: int ->
   ?image: image ->
-  ?rating: pics_rating ->
+  ?rating: string ->
   ?text_input: text_input ->
-  ?skip_hours: skip_hours ->
-  ?skip_days: skip_days ->
+  ?skip_hours: int list ->
+  ?skip_days: int list ->
   ?data: 'a ->
   ?namespaces: namespace list ->
   'b item_t list ->
@@ -281,16 +260,13 @@ exception Error of string
 (** Options used when reading source. *)
 type ('a, 'b) opts
 
-(** See Neturl documentation for [schemes] and [base_syntax] options.
-  They are used to parse URLs.
+(**
   @param read_channel_data provides a way to read additional information from the
   subnodes of the channels. All these subnodes are prefixed by an expanded namespace.
   @param read_item_data is the equivalent of [read_channel_data] parameter but
   is called of each item with its prefixed subnodes.
   *)
 val make_opts :
-  ?schemes: (string, Neturl.url_syntax) Hashtbl.t ->
-  ?base_syntax: Neturl.url_syntax ->
   ?read_channel_data: (xmltree list -> 'a option) ->
   ?read_item_data: (xmltree list -> 'b option) ->
   unit -> ('a, 'b) opts
@@ -320,11 +296,11 @@ type 'a data_printer = 'a -> xmltree list
 val print_channel :
   ?channel_data_printer: 'a data_printer ->
   ?item_data_printer: 'b data_printer ->
-  ?indent: int -> ?date_fmt: string -> ?encoding: string ->
+  ?indent: int -> ?encoding: string ->
     Format.formatter -> ('a, 'b) channel_t -> unit
 
 val print_file :
   ?channel_data_printer: 'a data_printer ->
   ?item_data_printer: 'b data_printer ->
-    ?indent: int -> ?date_fmt: string -> ?encoding: string ->
+    ?indent: int -> ?encoding: string ->
     string -> ('a, 'b) channel_t -> unit

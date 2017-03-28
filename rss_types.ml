@@ -25,24 +25,17 @@
 
 (** *)
 
-type email = string (** can be, for example: foo\@bar.com (Mr Foo Bar) *)
-type pics_rating = string
-type skip_hours = int list (** 0 .. 23 *)
-type skip_days = int list (** 0 is Sunday, 1 is Monday, ... *)
-
-type url = Neturl.url
-
 type category =
     {
       cat_name : string ;
-      cat_domain : url option ;
+      cat_domain : Uri.t option ;
     }
 
 type image =
     {
-      image_url : url ;
+      image_url : Uri.t ;
       image_title : string ;
-      image_link : url ;
+      image_link : Uri.t ;
       image_height : int option ;
       image_width : int option ;
       image_desc : string option ;
@@ -53,12 +46,12 @@ type text_input =
       ti_title : string ; (** The label of the Submit button in the text input area. *)
       ti_desc : string ; (** Explains the text input area. *)
       ti_name : string ; (** The name of the text object in the text input area. *)
-      ti_link : url ; (** The URL of the CGI script that processes text input requests. *)
+      ti_link : Uri.t ; (** The URL of the CGI script that processes text input requests. *)
     }
 
 type enclosure =
     {
-      encl_url : url ; (** URL of the enclosure *)
+      encl_url : Uri.t ; (** URL of the enclosure *)
       encl_length : int ; (** size in bytes *)
       encl_type : string ; (** MIME type *)
     }
@@ -72,23 +65,23 @@ type cloud = {
     cloud_protocol : string ;
   }
 
-type guid = Guid_permalink of url | Guid_name of string
+type guid = Guid_permalink of Uri.t | Guid_name of string
 
 type source =
     {
       src_name : string ;
-      src_url : url ;
+      src_url : Uri.t ;
     }
 
 type 'a item_t =
     {
       item_title : string option ;
-      item_link : url option ;
+      item_link : Uri.t option ;
       item_desc : string option ;
-      item_pubdate : Netdate.t option ;
-      item_author : email option ;
+      item_pubdate : Ptime.t option ;
+      item_author : string option ;
       item_categories : category list ;
-      item_comments : url option ;
+      item_comments : Uri.t option ;
       item_enclosure : enclosure option ;
       item_guid : guid option ;
       item_source : source option ;
@@ -100,24 +93,24 @@ type 'a item_t =
 type ('a, 'b) channel_t =
     {
       ch_title : string ;
-      ch_link : url ;
+      ch_link : Uri.t ;
       ch_desc : string ;
       ch_language : string option ;
       ch_copyright : string option ;
-      ch_managing_editor : email option ;
-      ch_webmaster : email option ;
-      ch_pubdate : Netdate.t option ;
-      ch_last_build_date : Netdate.t option ;
+      ch_managing_editor : string option ;
+      ch_webmaster : string option ;
+      ch_pubdate : Ptime.t option ;
+      ch_last_build_date : Ptime.t option ;
       ch_categories : category list ;
       ch_generator : string option ;
       ch_cloud : cloud option ;
-      ch_docs : url option ;
+      ch_docs : Uri.t option ;
       ch_ttl : int option ;
       ch_image : image option ;
-      ch_rating : pics_rating option ;
+      ch_rating : string option ;
       ch_text_input : text_input option ;
-      ch_skip_hours : skip_hours option ;
-      ch_skip_days : skip_days option ;
+      ch_skip_hours : int list option ;
+      ch_skip_days : int list option ;
       ch_items : 'b item_t list ;
       ch_data : 'a option ;
       ch_namespaces : (string * string) list ;
@@ -126,23 +119,16 @@ type ('a, 'b) channel_t =
 type item = unit item_t
 type channel = (unit, unit) channel_t
 
-let rec apply_comp item1 item2 = function
-  [] -> 0
-| f :: q ->
-    match f item1 item2 with
-      0 -> apply_comp item1 item2 q
-    | n -> n
-;;
-
-let compare_opt f x y =
+let compare_opt ~f x y =
   match x, y with
   | Some _, None -> 1
   | None, Some _ -> -1
   | None, None -> 0
   | Some x, Some y -> f x y
-;;
 
-let compare_list f =
+let compare_url_opt = compare_opt ~f:Uri.compare
+
+let compare_list ~f =
   let rec iter = function
   | [], [] -> 0
   | [], _ -> -1
@@ -154,32 +140,20 @@ let compare_list f =
   in
   fun l1 l2 -> iter (l1, l2)
 
-let compare_url url1 url2 =
-  Pervasives.compare
-    (Neturl.string_of_url url1)
-    (Neturl.string_of_url url2)
-
-let compare_url_opt = compare_opt compare_url;;
-
-let compare_enclosure e1 e2 =
-  Pervasives.compare
-    (Neturl.string_of_url e1.encl_url)
-    (Neturl.string_of_url e2.encl_url)
+let compare_enclosure { encl_url = e1 } { encl_url = e2 } =
+  Uri.compare e1 e2
 ;;
 
 let compare_guid g1 g2 =
   match g1, g2 with
-  | Guid_permalink url1, Guid_permalink url2 ->
-     Pervasives.compare
-        (Neturl.string_of_url url1)
-        (Neturl.string_of_url url2)
+  | Guid_permalink url1, Guid_permalink url2 -> Uri.compare url1 url2
   | Guid_permalink _, Guid_name _ -> 1
   | Guid_name _, Guid_permalink _ -> -1
   | Guid_name s1, Guid_name s2 -> Pervasives.compare s1 s2
 ;;
 
 let compare_source s1 s2 =
-  match compare_url s1.src_url s2.src_url with
+  match Uri.compare s1.src_url s2.src_url with
     0 -> Pervasives.compare s1.src_name s2.src_name
   | n -> n
 ;;
@@ -204,6 +178,13 @@ let item_comp_funs =
     (fun i1 i2 -> compare_opt compare_source i1.item_source i2.item_source) ;
   ]
 ;;
+
+let rec apply_comp item1 item2 = function
+  | [] -> 0
+  | f :: q ->
+    match f item1 item2 with
+      0 -> apply_comp item1 item2 q
+    | n -> n
 
 let compare_item ?comp_data =
   let comp_funs =

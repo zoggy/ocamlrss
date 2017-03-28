@@ -1,0 +1,18 @@
+opam-version: "1.2"
+maintainer: "zoggy@bat8.org"
+authors: ["Maxence Guesdon"]
+homepage: "http://zoggy.github.io/ocamlrss/"
+license: "GNU Lesser General Public License version 3"
+doc: ["http://zoggy.github.io/ocamlrss/refdoc/Rss.html"]
+tags: [
+  "rss"
+  "xml"
+]
+build: [ "jbuilder" "build" "@install" ]
+depends: [
+  "jbuilder {build}"
+  "uri"
+  "xmlm"
+  "ptime"
+]
+available: [ ocaml-version >= "4.02.3" ]
